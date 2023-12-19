@@ -1,3 +1,5 @@
+Connect-AzAccount -TenantId 08ae1829-e11c-4c1f-b8dd-b8ad3d146a66
+
 $NSnetworkModels = "Microsoft.Azure.Commands.Network.Models"
 $NScollections = "System.Collections.Generic"
 
@@ -44,17 +46,17 @@ $routeTableMiManagementService = New-AzRouteTable `
  -location $location
 
 $virtualNetwork = New-AzVirtualNetwork `
- -ResourceGroupName $resourceGroupName `
- -Location $location `
- -Name $vNetName `
- -AddressPrefix $vNetAddressPrefix
+                        -ResourceGroupName $resourceGroupName `
+                        -Location $location `
+                        -Name $vNetName `
+                        -AddressPrefix $vNetAddressPrefix
 
                   Add-AzVirtualNetworkSubnetConfig `
- -Name $miSubnetName `
-                      -VirtualNetwork $virtualNetwork `
- -AddressPrefix $miSubnetAddressPrefix `
- -NetworkSecurityGroup $networkSecurityGroupMiManagementService `
- -RouteTable $routeTableMiManagementService |
+                        -Name $miSubnetName `
+                        -VirtualNetwork $virtualNetwork `
+                        -AddressPrefix $miSubnetAddressPrefix `
+                        -NetworkSecurityGroup $networkSecurityGroupMiManagementService `
+                        -RouteTable $routeTableMiManagementService |
                   Set-AzVirtualNetwork
 
 $virtualNetwork = Get-AzVirtualNetwork -Name $vNetName -ResourceGroupName $resourceGroupName
