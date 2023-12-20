@@ -1,4 +1,4 @@
-Remove-AzResourceGroup -ResourceGroupName 'HimResourceGroup-1350475815'
+#  Remove-AzResourceGroup -ResourceGroupName 'HimResourceGroup-1350475815'
 
 
 $NSnetworkModels = "Microsoft.Azure.Commands.Network.Models"
