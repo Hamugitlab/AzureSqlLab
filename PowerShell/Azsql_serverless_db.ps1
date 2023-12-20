@@ -1,12 +1,13 @@
 
 
 # Set variables for your server and database
-$resourceGroupName = "myResourceGroupHim"
-$location = "eastus"
+$resourceGroupName = "HimResourceGroup1"
+$location = "eastus2"
 $adminLogin = "azureuser"
 $password = "Azure1234567!"
-$serverName = "mysqlserver-$(Get-Random)"
-$databaseName = "mySampleDatabaseHim"
+$serverName = "himsqlserver-$(Get-Random)"
+$databaseName = "himSampleDatabase"
+$CollationName = "Latin1_General_CI_AS"
 
 # The ip address range that you want to allow to access your server
 $startIp = "0.0.0.0"
