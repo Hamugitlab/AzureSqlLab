@@ -1,22 +1,25 @@
+
 #  Remove-AzResourceGroup -ResourceGroupName 'HimResourceGroup-1350475815'
 
 
 $NSnetworkModels = "Microsoft.Azure.Commands.Network.Models"
 $NScollections = "System.Collections.Generic"
 
+
+
 # Connect-AzAccount
 # The SubscriptionId in which to create these objects
 # $SubscriptionId = ''
 # Set the resource group name and location for your managed instance
-$resourceGroupName = "HimResourceGroup-$(Get-Random)"
+$resourceGroupName = "HimResourceGroup-mi-spoke"
 $location = "eastus2"
 # Set the networking values for your managed instance
-$vNetName = "HimVnet-$(Get-Random)"
-$vNetAddressPrefix = "10.0.0.0/16"
+$vNetName = "HimVnet-miinstance"
+$vNetAddressPrefix = "10.1.0.0/16"
 $defaultSubnetName = "HimDefaultSubnet-$(Get-Random)"
-$defaultSubnetAddressPrefix = "10.0.0.0/24"
+$defaultSubnetAddressPrefix = "10.1.0.0/24"
 $miSubnetName = "HimMISubnet-$(Get-Random)"
-$miSubnetAddressPrefix = "10.0.0.0/24"
+$miSubnetAddressPrefix = "10.1.0.0/24"
 #Set the managed instance name for the new managed instance
 $instanceName = "himminame-$(Get-Random)"
 # Set the admin login and password for your managed instance
