@@ -4,3 +4,18 @@ Check the spelling of the name, or if a path was included, verify that the path 
 ipsec: 
 
 Fix > Install-Module -Name Az -Repository PSGallery -Force 
+
+
+
+Use Case 
+
+BACKUP DATABASE [SQLTestDB] TO  URL = N'https://storageaccount.blob.core.windows.net/sqlbackup/sqltestdb_backup_2023_12_28_180603.bak' WITH  BLOCKSIZE = 65536,  MAXTRANSFERSIZE = 4194304,  COPY_ONLY, NOFORMAT, NOINIT,  NAME = N'SQLTestDB-Full Database Backup', NOSKIP, NOREWIND, NOUNLOAD,  STATS = 10
+GO
+
+error >
+Msg 41922, Level 16, State 1, Line 1
+The backup operation for a database with service-managed transparent data encryption is not supported on SQL Database Managed Instance.
+Msg 3013, Level 16, State 1, Line 1
+BACKUP DATABASE is terminating abnormally.
+
+Completion time: 2023-12-28T18:07:21.0138198+01:00

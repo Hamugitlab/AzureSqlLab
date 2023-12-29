@@ -1,24 +1,21 @@
-Remove-AzResourceGroup -ResourceGroupName 'HimResourceGroup-1350475815'
-
-
 $NSnetworkModels = "Microsoft.Azure.Commands.Network.Models"
 $NScollections = "System.Collections.Generic"
 
-# Connect-AzAccount
+#Connect-AzAccount
 # The SubscriptionId in which to create these objects
-# $SubscriptionId = ''
+$SubscriptionId = ''
 # Set the resource group name and location for your managed instance
-$resourceGroupName = "HimResourceGroup-$(Get-Random)"
-$location = "eastus2"
+$resourceGroupName = "myResourceGroup-$(Get-Random)"
+$location = "eastus"
 # Set the networking values for your managed instance
-$vNetName = "HimVnet-$(Get-Random)"
-$vNetAddressPrefix = "10.0.0.0/16"
-$defaultSubnetName = "HimDefaultSubnet-$(Get-Random)"
-$defaultSubnetAddressPrefix = "10.0.0.0/24"
-$miSubnetName = "HimMISubnet-$(Get-Random)"
-$miSubnetAddressPrefix = "10.0.0.0/24"
+$vNetName = "myVnet-$(Get-Random)"
+$vNetAddressPrefix = "10.2.0.0/16"
+# $defaultSubnetName = "myDefaultSubnet-$(Get-Random)"
+# $defaultSubnetAddressPrefix = "10.2.0.0/24"
+$miSubnetName = "myMISubnet-$(Get-Random)"
+$miSubnetAddressPrefix = "10.2.0.0/24"
 #Set the managed instance name for the new managed instance
-$instanceName = "himminame-$(Get-Random)"
+$instanceName = "myminame-$(Get-Random)"
 # Set the admin login and password for your managed instance
 $miAdminSqlLogin = "SqlAdmin"
 $miAdminSqlPassword = "Azure1234567!12345"
@@ -30,34 +27,34 @@ $computeGeneration = "Gen5"
 $license = "LicenseIncluded" #"BasePrice" or LicenseIncluded if you have don't have SQL Server licence that can be used for AHB discount
 
 # Set subscription context
-# Set-AzContext -SubscriptionId $SubscriptionId 
+#Set-AzContext -SubscriptionId $SubscriptionId 
 
 # Create a resource group
-$resourceGroup = New-AzResourceGroup -Name $resourceGroupName -Location $location -Tag @{Owner="SQLDB-Samples"}
+# $resourceGroup = New-AzResourceGroup -Name $resourceGroupName -Location $location -Tag @{Owner="SQLDB-Samples"}
 
 # Configure virtual network, subnets, network security group, and routing table
 $networkSecurityGroupMiManagementService = New-AzNetworkSecurityGroup `
--Name 'HimNetworkSecurityGroupMiManagementService' `
--ResourceGroupName $resourceGroupName `
--location $location
+                      -Name 'myNetworkSecurityGroupMiManagementService' `
+                      -ResourceGroupName $resourceGroupName `
+                      -location $location
 
 $routeTableMiManagementService = New-AzRouteTable `
- -Name 'HimRouteTableMiManagementService' `
- -ResourceGroupName $resourceGroupName `
- -location $location
+                      -Name 'myRouteTableMiManagementService' `
+                      -ResourceGroupName $resourceGroupName `
+                      -location $location
 
 $virtualNetwork = New-AzVirtualNetwork `
- -ResourceGroupName $resourceGroupName `
- -Location $location `
- -Name $vNetName `
- -AddressPrefix $vNetAddressPrefix
+                      -ResourceGroupName $resourceGroupName `
+                      -Location $location `
+                      -Name $vNetName `
+                      -AddressPrefix $vNetAddressPrefix
 
                   Add-AzVirtualNetworkSubnetConfig `
- -Name $miSubnetName `
-                   -VirtualNetwork $virtualNetwork `
- -AddressPrefix $miSubnetAddressPrefix `
- -NetworkSecurityGroup $networkSecurityGroupMiManagementService `
- -RouteTable $routeTableMiManagementService |
+                      -Name $miSubnetName `
+                      -VirtualNetwork $virtualNetwork `
+                      -AddressPrefix $miSubnetAddressPrefix `
+                      -NetworkSecurityGroup $networkSecurityGroupMiManagementService `
+                      -RouteTable $routeTableMiManagementService |
                   Set-AzVirtualNetwork
 
 $virtualNetwork = Get-AzVirtualNetwork -Name $vNetName -ResourceGroupName $resourceGroupName
@@ -105,7 +102,7 @@ $denyOutParameters = @{
 
 Get-AzNetworkSecurityGroup `
         -ResourceGroupName $resourceGroupName `
-        -Name "HimNetworkSecurityGroupMiManagementService" |
+        -Name "myNetworkSecurityGroupMiManagementService" |
     Add-AzNetworkSecurityRuleConfig `
         @allowParameters `
         -Priority 1000 `
@@ -133,10 +130,10 @@ $credential = New-Object System.Management.Automation.PSCredential ($miAdminSqlL
 
 # Create managed instance
 New-AzSqlInstance -Name $instanceName `
- -ResourceGroupName $resourceGroupName -Location $location -SubnetId $miSubnetConfigId `
- -AdministratorCredential $credential `
- -StorageSizeInGB $maxStorage -VCore $vCores -Edition $edition `
- -ComputeGeneration $computeGeneration -LicenseType $license
+                      -ResourceGroupName $resourceGroupName -Location $location -SubnetId $miSubnetConfigId `
+                      -AdministratorCredential $credential `
+                      -StorageSizeInGB $maxStorage -VCore $vCores -Edition $edition `
+                      -ComputeGeneration $computeGeneration -LicenseType $license
 
 # Clean up deployment 
 # Remove-AzResourceGroup -ResourceGroupName $resourceGroupName
