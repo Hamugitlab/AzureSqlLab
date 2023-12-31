@@ -26,6 +26,7 @@ $maxStorage = 32
 $computeGeneration = "Gen5"
 $license = "LicenseIncluded" #"BasePrice" or LicenseIncluded if you have don't have SQL Server licence that can be used for AHB discount
 
+$databaseName = 'himtestdb'
 # Set subscription context
 #Set-AzContext -SubscriptionId $SubscriptionId 
 
@@ -135,5 +136,15 @@ New-AzSqlInstance -Name $instanceName `
                       -StorageSizeInGB $maxStorage -VCore $vCores -Edition $edition `
                       -ComputeGeneration $computeGeneration -LicenseType $license
 
+#Create the Database
+
+New-AzSqlInstanceDatabase -InstanceName $instanceName  -Name $databaseName -ResourceGroupName $resourceGroupName
+
+#Remove the Database 
+$resourceGroupName = "<resource group name>"
+$managedInstanceName = "<managed instance name>"
+$databaseName = "<source database name>"
+
+Remove-AzSqlInstanceDatabase -Name $databaseName -InstanceName $managedInstanceName -ResourceGroupName $resourceGroupName
 # Clean up deployment 
 # Remove-AzResourceGroup -ResourceGroupName $resourceGroupName
