@@ -1,0 +1,16 @@
+pool:
+  name: himvm
+steps:
+- task: AzurePowerShell@5
+  displayName: 'Azure PowerShell script: FilePath'
+  inputs:
+    azureSubscription: test
+    ScriptPath: 'PowerShell/Az_vm.ps1'
+    azurePowerShellVersion: LatestVersion
+
+#- task: AzurePowerShell@5
+#  displayName: 'Azure PowerShell script: FilePath'
+#  inputs:
+#    azureSubscription: test
+#    ScriptPath: 'PowerShell/storage.ps1'
+#    azurePowerShellVersion: LatestVersion
