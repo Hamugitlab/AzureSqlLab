@@ -1,0 +1,123 @@
+# DEBUG: See start of each build run's output how to connect with RDP to build server
+# for debugging.
+
+version: 1.0.{build}
+
+# Do not build on full releases.
+skip_tags: true
+
+# See https://www.appveyor.com/docs/windows-images-software
+# DEBUG: for debug purpose, comment and un-comment images as needed.
+image:
+- Visual Studio 2019 # Windows Server 2019
+#- Visual Studio 2017 # Windows Server 2016
+#- Visual Studio 2013 # Windows Server 2012 R2
+
+environment:
+  # DEBUG: Un-comment this to get the same password for the RDP session for each build
+  #APPVEYOR_RDP_PASSWORD: D5c1234!
+  # DEBUG: Un-comment these to skip installing the various instances (to speed up debug)
+  #SKIP_DATABASE_ENGINE_INSTANCE: true
+  #SKIP_DATABASE_ENGINE_DEFAULT_INSTANCE: true
+  #SKIP_ANALYSIS_MULTI_INSTANCE: true
+  #SKIP_ANALYSIS_TABULAR_INSTANCE: true
+  matrix:
+  # DEBUG: Comment and un-comment the different SQL Server version that should be tested.
+  - TEST_CONFIGURATION: Integration_SQL2016
+  - TEST_CONFIGURATION: Integration_SQL2017
+  #- TEST_CONFIGURATION: Integration_SQL2019
+  #- TEST_CONFIGURATION: Integration_SQL2022
+
+# DEBUG: See section on_finish last in this file on how to block build to keep RDP open.
+# DEBUG: If running on own AppVeyor project, comment the line below that skips if it is not a pull request
+init:
+- ps: |
+    # Only run for pull requests
+    if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { Write-Host -ForegroundColor 'Yellow' -Object 'Not a pull request, skipping.'; return }
+
+    iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+# DEBUG: If running on own AppVeyor project, comment the line below that skips if it is not a pull request
+install:
+- ps: |
+    # Only run for pull requests
+    if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { Write-Host -ForegroundColor 'Yellow' -Object 'Not a pull request, skipping.'; return }
+
+    winrm quickconfig -quiet # cSpell: disable-line
+
+    Import-Module -Name ./tests/TestHelpers/CommonTestHelper.psm1
+    Remove-PowerShellModuleFromCI -Name @('SqlServer', 'SQLPS')
+    Remove-Module -Name CommonTestHelper
+
+# DEBUG: If running on own AppVeyor project, comment the line below that skips if it is not a pull request
+build_script:
+- pwsh: |
+    # Only run for pull requests
+    if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { Write-Host -ForegroundColor 'Yellow' -Object 'Not a pull request, skipping.'; return }
+
+    dotnet tool install --global GitVersion.Tool
+    $env:IGNORE_NORMALISATION_GIT_HEAD_MOVE = 1 # cSpell: disable-line
+    dotnet-gitversion
+    $gitVersionObject = dotnet-gitversion | ConvertFrom-Json
+    $gitVersionObject
+    $env:ModuleVersion = $gitVersionObject.NuGetVersionV2
+
+    # Build the module
+    ./build.ps1 -ResolveDependency -tasks build
+
+# DEBUG: Comment and un-comment integration tests as needed for the purpose of debugging.
+# Note that some integration tests depend on each other to work. See the README for more
+# information: https://github.com/dsccommunity/SqlServerDsc/blob/main/tests/Integration/README.md
+# DEBUG: If running on own AppVeyor project, comment the line below that skips if it is not a pull request
+test_script:
+- ps: |
+    # Only run for pull requests
+    if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { Write-Host -ForegroundColor 'Yellow' -Object 'Not a pull request, skipping.'; return }
+
+    ./build.ps1 -Tasks test -CodeCoverageThreshold 0 -PesterTag $env:TEST_CONFIGURATION -PesterPath @(
+        ### Run the integration tests in a specific group order.
+        ## Group 1
+        'tests/Integration/DSC_SqlSetup.Integration.Tests.ps1'
+        # Group 2
+        #'tests/Integration/DSC_SqlAgentAlert.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlLogin.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlEndpoint.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlDatabaseMail.Integration.Tests.ps1'
+        'tests/Integration/DSC_SqlRSSetup.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlDatabaseDefaultLocation.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlDatabase.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlAlwaysOnService.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlAgentOperator.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlServiceAccount.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlAgentFailsafe.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlTraceFlag.Integration.Tests.ps1'
+        ## Group 3
+        #'tests/Integration/DSC_SqlRole.Integration.Tests.ps1'
+        'tests/Integration/DSC_SqlRS.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlDatabaseUser.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlReplication.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlAudit.Integration.Tests.ps1'
+        ## Group 4
+        #'tests/Integration/DSC_SqlScript.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlDatabasePermission.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlPermission.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlWindowsFirewall.Integration.Tests.ps1'
+        ## Group 5
+        #'tests/Integration/DSC_SqlSecureConnection.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlScriptQuery.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlProtocol.Integration.Tests.ps1'
+        ## Group 6 (tests makes changes that could make SQL Server to loose connectivity)
+        #'tests/Integration/DSC_SqlProtocolTcpIp.Integration.Tests.ps1'
+        #'tests/Integration/DSC_SqlDatabaseObjectPermission.Integration.Tests.ps1'
+    )
+
+deploy: off
+
+# DEBUG: Un-comment the line "$blockRdp = $true" so that build worker is kept up all of the 60 minutes.
+# DEBUG: If running on own AppVeyor project, comment the line below that skips if it is not a pull request
+on_finish:
+- ps: |
+    if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { Write-Host -ForegroundColor 'Yellow' -Object 'Not a pull request, skipping.'; return }
+
+    #$blockRdp = $true
+    iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
