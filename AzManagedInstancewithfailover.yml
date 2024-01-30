@@ -1,0 +1,21 @@
+pool:
+  name: Azure Pipelines
+
+# Set variables once
+variables:
+  subscriptionId: f3158665-b952-4650-aa6e-1e8d23671391
+  resourceGroupName: myResourceGroup
+  
+steps:
+- task: PowerShell@2
+  displayName: 'PowerShell Script variable'
+  inputs:
+    targetType: filePath
+    filePath: ./ManagedInstancePS/variable.ps1
+
+- task: AzurePowerShell@5
+  displayName: 'Azure full script'
+  inputs:
+    azureSubscription: 'Devops-Connection-to-Portal'
+    ScriptPath: ManagedInstancePS/fullscript.ps1
+    azurePowerShellVersion: LatestVersion

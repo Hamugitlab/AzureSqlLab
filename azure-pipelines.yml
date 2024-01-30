@@ -1,0 +1,16 @@
+pool:
+  name: himvm
+steps:
+- task: AzurePowerShell@5
+  displayName: 'Azure PowerShell script: FilePath'
+  inputs:
+    azureSubscription: test
+    ScriptPath: 'StorageAccount-Terraform/storage.ps1'
+    azurePowerShellVersion: LatestVersion
+
+- task: AzurePowerShell@5
+  displayName: 'Azure PowerShell script: FilePath'
+  inputs:
+    azureSubscription: test
+    ScriptPath: 'StorageAccount-Terraform/storage.ps1'
+    azurePowerShellVersion: LatestVersion
