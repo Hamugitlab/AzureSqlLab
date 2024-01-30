@@ -1,5 +1,5 @@
 # The SubscriptionId in which to create these objects
-$subscriptionId = 'f3158665-b952-4650-aa6e-1e8d23671391'
+$subscriptionId = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 # Create a random identifier to use as subscript for the different resource names
 $randomIdentifier = $(Get-Random)
 # Set the resource group name and location for SQL Managed Instance
